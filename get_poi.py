@@ -1,6 +1,9 @@
 # SQLAlchemy creates an engine that connects Pandas with a Postgres database
 # Documentation: https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html
 # !pip install SQLAlchemy
+import os
+
+from dotenv import load_dotenv
 import json
 import pandas as pd
 from sqlalchemy import create_engine
@@ -8,8 +11,12 @@ from shapely.geometry import shape
 import pandas as pd
 import geopandas as gpd
 
+
+# Load environment variables
+load_dotenv()
+
 # Establish connection to Postgres db
-engine = create_engine('postgresql://read_only_user:readonly@botanero.cwrlqxaxktn3.us-west-2.rds.amazonaws.com:5432/postgres')
+engine = create_engine(os.getenv('POSTGRES_CONNECTION', None))
 
 def get_places_geoenriched():
 

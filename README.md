@@ -4,7 +4,7 @@
 
 ```
 # Create virtual environment
-python -m venv .venv
+python3 -m venv .venv
 # Activate virtual environment
 . .venv/bin/activate
 # Pip install required libraries
