@@ -15,11 +15,7 @@ import plotly.graph_objects as go
 from itertools import chain
 
 import preprocess
-
-from dash.dependencies import Input, Output
-
-app = dash.Dash(__name__, suppress_callback_exceptions=True)
-
+from app import app
 
 df_preprocess = preprocess.preprocess_and_load_survey_df()
 df_preprocess['count_events']=1
@@ -82,16 +78,16 @@ input_data = [
 
 category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[v_criteria])) for v_criteria in target_columns}
 
-
 layout = dbc.Container([
     dbc.Row(
         dbc.Col(
-            html.H2( id='title_header', 
-            className='text-center text-primary, mb-3'))),
+            html.H1( id='title_header_app2', 
+            #className='text-center text-primary, mb-3'
+            ))),
     # Multiple-value dropdown
     dbc.Row([
         dbc.Col([
-            html.H4('Select a category to evaluate:', className='text_center', style={'color':'blue','fontSize':'20'}),
+            html.H3('Select a category to evaluate:', className='text_center', ),
             dcc.Dropdown(
                 id='first-dropdown',
                 options = input_data,
@@ -109,7 +105,7 @@ layout = dbc.Container([
         width={'size': 7, 'offset': 0, 'order': 2}),
         
         dbc.Col([
-        dcc.Graph(id='Histogram',
+        dcc.Graph(id='Histogram_app2',
                 style={'height':500, 'color': 'blue', 'fontSize': 20}),  
         html.Hr(),
         ],width={'size': 5, 'offset': 0, 'order': 1})
@@ -119,16 +115,17 @@ layout = dbc.Container([
         dcc.Dropdown(
             id = 'second-dropdown',
             multi=True,
-            ), 
+            ),
         html.Hr()      
         ],width={'size': 12, 'offset': 0, 'order': 1}),
     ]),
     dbc.Row([
             dbc.Col([
-            dcc.Graph(id="map", 
-                    style={'height':350, 'color': 'blue', 'fontSize': 20}), 
+            dcc.Graph(id="map_app2", 
+                    #style={'height':350, 'color': 'blue', 'fontSize': 20}
+                    ), 
             html.Hr()],
-            width={'size': 10, 'offset': 0, 'order': 1}),
+            width={'size': 11, 'offset': 0, 'order': 1}),
     ]),
     dbc.Row([
         dbc.Col([
@@ -142,22 +139,31 @@ layout = dbc.Container([
                 style={'height':400, 'color': 'blue', 'fontSize': 20}), 
         html.Hr()],
         width={'size': 5, 'offset': 0, 'order': 2})
-    ]),        
-    dcc.Link('Go to App 2', href='/apps/app2')
+    ]),
+# SECTION: Link to main Page
+    dbc.Row(
+        dbc.Col(
+            dcc.Link('Go to main page', href='/')
+        )
+    ),
+    dbc.Row(
+        dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
+    ),
 ])
+
 @app.callback(
     dash.dependencies.Output('second-dropdown', 'options'),
-    dash.dependencies.Output('title_header','children'),
+    dash.dependencies.Output('title_header_app2','children'),
     [dash.dependencies.Input('first-dropdown', 'value')]
 )
 def first_dropdown(first_dropdown_name):
-
-    return [{'label': i.replace("_"," "), 'value': i} for i in category_dict[first_dropdown_name]], f'Values selected {first_dropdown_name.replace("_"," ").title()}'
+    options_second_dropdown = [{'label': i.replace("_"," "), 'value': i} for i in category_dict[first_dropdown_name]]
+    return options_second_dropdown, f'Values selected {first_dropdown_name.replace("_"," ").title()}'
 
 @app.callback(
     dash.dependencies.Output('bar-chart','figure'),
-    dash.dependencies.Output('map','figure'),
-    dash.dependencies.Output('Histogram','figure'),
+    dash.dependencies.Output('map_app2','figure'),
+    dash.dependencies.Output('Histogram_app2','figure'),
     dash.dependencies.Output('sunburst','figure'),
     dash.dependencies.Output('table','figure'),
     [dash.dependencies.Input('first-dropdown','value')],
@@ -172,15 +178,37 @@ def update_line_chart(first_dropdown_name, second_dropdown_name):
     fig = px.bar(create_visual_2(df_visual_1,first_dropdown_name)[mask], 
     x="creation_date", 
     y="count_events", 
-    color=first_dropdown_name, title=" per day")
-    fig.update_layout(margin={"r":0,"t":20,"l":0,"b":0})
-
+    color=first_dropdown_name, title="Count per Day")
+    fig.update_layout(
+        font_family="Courier New",
+        font_color="blue",
+        title_font_family="Arial",
+        xaxis_title="Creation Date",
+        yaxis_title="Count",
+        legend_title="Categories",
+        title_font_color="purple",
+        legend_title_font_color="purple"
+    )
+    fig.update_xaxes(
+    rangeslider_visible=True,
+    rangeselector=dict(
+        buttons=list([
+            dict(count=7, label="1w", step="day", stepmode="backward"),
+            dict(count=1, label="1m", step="month", stepmode="backward"),
+            dict(count=6, label="6m", step="month", stepmode="backward"),
+            dict(count=1, label="YTD", step="year", stepmode="todate"),
+            dict(count=1, label="1y", step="year", stepmode="backward"),
+            dict(step="all")
+        ])
+    )
+)
     mask2 = df_visual_1[first_dropdown_name].isin(second_dropdown_name)
     fig2 = px.scatter_mapbox((df_visual_1)[mask2], 
                             lat="y_latitude", lon="x_longitude", hover_name=first_dropdown_name, 
                             color=first_dropdown_name, hover_data=["event_type", "location"], zoom=14, height=350)
     fig2.update_layout(mapbox_style="open-street-map")
     fig2.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig2.update_traces(marker_size=10)
 
     fig3 = px.histogram(df_visual_1, y=first_dropdown_name)
     fig3.update_layout(margin={"r":10,"t":20,"l":0,"b":0})
@@ -198,5 +226,7 @@ def update_line_chart(first_dropdown_name, second_dropdown_name):
     fig5.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     
     return fig, fig2, fig3, fig4, fig5
+
+
 
 
