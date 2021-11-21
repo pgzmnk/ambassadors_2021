@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    command: gunicorn --workers=5 --threads=1 -b 0.0.0.0:8000 index:server
+    ports:
+      - 5000:5000
+      - 8000:8000
+      - 8050:8050
+    env_file:
+      - .env
+
+  # nginx:
+  #   image: nginx:1.15-alpine 
+  #   container_name: nginx
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./https_utils/nginx_ec2:/etc/nginx/conf.d
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   depends_on:
+  #     - app
