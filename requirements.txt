@@ -8,3 +8,6 @@ rtree==0.9.7
 python-dotenv==0.19.1
 dash
 dash_bootstrap_components
+mapclassify==2.4.3
+matplotlib==3.5.0
+seaborn

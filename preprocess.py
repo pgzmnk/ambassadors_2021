@@ -117,10 +117,9 @@ def preprocess_and_load_survey_df():
         'other', 'no_data', regex=False)
 
     # combine channeling with other_medical_health_concerns column
-
-    df_all['channeling'] = df_all.channeling.str.cat(
-        df_all.other_channeling, sep=",")
-    df_all = df_all.drop(columns=['other_channeling'])
+    df_all['channeling'] = df_all.channelling.str.cat(
+        df_all.other_channelling, sep=",")
+    df_all = df_all.drop(columns=['other_channelling'])
     df_all["channeling"] = df_all["channeling"].str.replace(
         'other', 'no_data', regex=False)
 
