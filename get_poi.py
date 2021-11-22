@@ -30,7 +30,7 @@ def get_places_geoenriched():
 
     # Pandas to GeoPandas
     gdf_places = gpd.GeoDataFrame(df_places)
-
+    
     # Set geometry column
     gdf_places['geometry'] = gpd.GeoDataFrame({'geometry':[shape(i) for i in df_places['geometry_as_json']]}).values
     return gdf_places

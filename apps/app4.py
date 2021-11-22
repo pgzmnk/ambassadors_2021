@@ -49,30 +49,8 @@ def create_visual_2 (df,v_criteria):
     df_visual_2=df_visual_2.groupby(['creation_date',v_criteria]).count().reset_index()
     return df_visual_2
 
-target_columns = ['event_type', 'person_involved',
-       'what_situation', 'medical_health_concerns', 'problem_social_behavior',
-       'streetscape_public_realm', 'engage_request', 'engage_provided',
-       'channeling', 'referrals', 'report_completed', 'assessment',
-       'notes_description', 'previous_engagement','hot_spot','general_location']
-
-input_data = [
-        {'label':'Event Type', 'value': "event_type"},
-        {'label':'Person Involved', 'value': "person_involved"},
-        {'label':'What Situation', 'value': "what_situation"},
-        {'label':'Medical Health Concens', 'value': "medical_health_concerns"},
-        {'label':'Problem Social Behavior', 'value': "problem_social_behavior"},
-        {'label':'Streetscape', 'value': "streetscape_public_realm"},
-        {'label':'Engagement Request', 'value': "engage_request"},
-        {'label':'Engagement Provided', 'value': "engage_provided"},
-        {'label':'Channeling', 'value': "channeling"},
-        {'label':'Referrals', 'value': "referrals"},
-        {'label':'Report Completed', 'value': "report_completed"},
-        {'label':'Assessment', 'value': "assessment"},
-        {'label':'Notes Description', 'value': "notes_description"},
-        {'label':'Previous Engagement', 'value': "previous_engagement"},
-        {'label':'Hot Spot', 'value': "hot_spot"},
-        {'label':'General Location', 'value': "general_location"},
-    ]
+target_columns = preprocess.target_columns()
+input_data = preprocess.input_data()
 
 category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[v_criteria])) for v_criteria in target_columns}
 
@@ -110,7 +88,7 @@ layout = dbc.Container([
     dbc.Row(
         dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
     ),
-# SECTION: Wellness_Check, Emergency_Services_Channeling, Provided_Naloxone_Kit, Provided_Information
+# SECTION: Wellness_Check, Emergency_Services_Channelling, Provided_Naloxone_Kit, Provided_Information
     dbc.Row([
         dbc.Col([
             dbc.Row([
@@ -125,8 +103,8 @@ layout = dbc.Container([
                 dbc.Col([
                     dbc.Card([
                         dbc.CardBody([
-                            html.H5("Emergency Services Channeling"),
-                            html.H2(id="Emergency_Services_Channeling", children="", style={'fontWeight':'bold','textAlign':'center'})
+                            html.H5("Emergency Services Channelling"),
+                            html.H2(id="Emergency_Services_Channelling", children="", style={'fontWeight':'bold','textAlign':'center'})
                         ])
                     ])
                 ], width=4),
@@ -170,7 +148,7 @@ layout = dbc.Container([
                 dbc.Col([
                     dbc.Card([
                         dbc.CardBody([
-                            html.P("Engagement Provided is Wellness Checks, Emergency Channeling, Providing Naloxone Kits & Information"),
+                            html.P("Engagement Provided is Wellness Checks, Emergency Channelling, Providing Naloxone Kits & Information"),
                             dcc.Graph(id="map_app4", config={'displayModeBar': True}
                                       )
                         ])
@@ -198,7 +176,7 @@ layout = dbc.Container([
 @app.callback(
     Output('map_app4','figure'),
     Output('Wellness_Check','children'),
-    Output('Emergency_Services_Channeling','children'),
+    Output('Emergency_Services_Channelling','children'),
     Output('Provided_Naloxone_Kit','children'),
     Output('Provided_Information','children'),
     Input('my-date-picker-start','date'),

@@ -1,3 +1,7 @@
+import subprocess
+import sys 
+from dash.exceptions import PreventUpdate
+
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
@@ -6,11 +10,15 @@ from app import app
 from apps import app1, app2, app3, app4, app5, app6, app7
 from nav_bar import nav_bar
 
+SCRIPT_TO_EXECUTE = 'survey123_to_postgres.py'
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     nav_bar,
-    html.Div(id='page-content')
+    html.Div(id='page-content'),
+    html.Br(),
+    html.Button('Update dataset from Survey123', id='the-button', className='card'),
+    html.Div(id='body-div', className='card')    
 ])
 
 index_page = html.Div([
@@ -55,6 +63,16 @@ def display_page(pathname):
     else:
         return index_page
 
+@app.callback(
+    Output(component_id='body-div', component_property='children'),
+    Input(component_id='the-button', component_property='n_clicks')
+)
+def update_output(n_clicks):
+    subprocess.run([sys.executable, SCRIPT_TO_EXECUTE])
+    if n_clicks is None:
+        raise PreventUpdate
+    else:
+        return "Updated."
 
 if __name__ == '__main__':
     app.run_server(debug=True)
