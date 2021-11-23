@@ -12,3 +12,5 @@ rtree==0.9.7
 seaborn>=0.11.2
 Shapely==1.8.0
 SQLAlchemy==1.4.26
+arcgis
+dash-bootstrap-templates==1.0.1

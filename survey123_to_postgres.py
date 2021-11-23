@@ -53,7 +53,7 @@ def load_to_postgres(df, table_name='survey_raw'):
     """
 
     # Establish connection to Postgres db
-    engine = create_engine(os.getenv('POSTGRES_CONNNECTION'))
+    engine = create_engine(os.getenv('POSTGRES_CONNECTION'))
 
     # Write dataframe to db with table name `surver_raw_table_name` (OVERWRITES)
     df.to_sql(table_name, engine, if_exists='replace')

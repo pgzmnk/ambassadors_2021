@@ -2,3 +2,6 @@
 *__pycache__/*
 .venv/
 */__pycache__/*
+
+survey123/*
+*.pem
