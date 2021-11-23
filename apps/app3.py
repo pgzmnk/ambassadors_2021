@@ -50,29 +50,8 @@ def create_visual_2 (df,v_criteria):
     df_visual_2=df_visual_2.groupby(['creation_date',v_criteria]).count().reset_index()
     return df_visual_2
 
-target_columns = ['event_type', 'person_involved',
-       'what_situation', 'medical_health_concerns', 'problem_social_behavior',
-       'streetscape_public_realm', 'engage_request', 'engage_provided',
-       'channeling', 'referrals', 'report_completed', 'assessment',
-       'notes_description', 'previous_engagement','hot_spot']
-
-input_data = [
-        {'label':'Event Type', 'value': "event_type"},
-        {'label':'Person Involved', 'value': "person_involved"},
-        {'label':'What Situation', 'value': "what_situation"},
-        {'label':'Medical Health Concens', 'value': "medical_health_concerns"},
-        {'label':'Problem Social Behavior', 'value': "problem_social_behavior"},
-        {'label':'Streetscape', 'value': "streetscape_public_realm"},
-        {'label':'Engagement Request', 'value': "engage_request"},
-        {'label':'Engagement Provided', 'value': "engage_provided"},
-        {'label':'Channeling', 'value': "channeling"},
-        {'label':'Referrals', 'value': "referrals"},
-        {'label':'Report Completed', 'value': "report_completed"},
-        {'label':'Assessment', 'value': "assessment"},
-        {'label':'Notes Description', 'value': "notes_description"},
-        {'label':'Previous Engagement', 'value': "previous_engagement"},
-        {'label':'Hot Spot', 'value': "hot_spot"},
-    ]
+target_columns = preprocess.target_columns()
+input_data = preprocess.input_data()
 
 category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[v_criteria])) for v_criteria in target_columns}
 

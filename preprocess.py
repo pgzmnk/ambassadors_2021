@@ -23,7 +23,7 @@ def preprocess_and_load_survey_df():
 
     # Read SQL table with pandas
     df_all = pd.read_sql("SELECT * FROM survey_raw", engine)
-
+#    print(df_all.columns)
     # clean the column names
     # PLEASE NOTE WE DELETED THE FIRST COLUMN LABELED ASSESSMENT SINCE THERE IS NO DATA IN THIS COLUMN
     cleaned_column_names = (df_all.columns
@@ -48,8 +48,8 @@ def preprocess_and_load_survey_df():
     #df_all.fillna("N_A", inplace = True)
 
     # Rename all the columns to snake_case convention
-    df_all = df_all.rename(columns={'location_details_landmarks': 'location', 'type_of_event': 'event_type', 'who_was_involved': 'person_involved', 'other_who_was_involved': 'other_person_involved', 'what_was_the_situation': 'what_situation', 'other_what_was_the_situation': 'other_situation', 'medical/_health_concerns': 'medical_health_concerns', 'other_medical/_health_concerns': 'other_medical_health_concerns', 'problematic_social_behaviours': 'problem_social_behavior', 'streetscape_&_public_realm': 'streetscape_public_realm', 'other_streetscape_&_public_realm': 'other_streetscape_public_realm',
-                           'engagement_requested': 'engage_request', 'other_engagement_requested': 'other_engage_request', 'engagement_provided': 'engage_provided', 'report_completed_by': 'report_completed', 'assessment1': 'assessment', 'relevant_notes/_description_of_incident': 'notes_description', 'if_the_person_is_a_resident/_visitor/_person_with_ubn_have_you_o': 'previous_engagement', 'list_their_distinctive_characteristics/tags': 'yes_characteristics_tags', 'if_"_yes"_how_many_times_including_this_time': 'yes_number_times', 'x': 'x_longitude', 'y': 'y_latitude'})
+    df_all = df_all.rename(columns={'location_details_landmarks': 'location', 'type_of_event': 'event_type', 'who_was_involved': 'person_involved', 'other_who_was_involved': 'other_person_involved', 'what_was_the_situation': 'what_situation', 'other_what_was_the_situation': 'other_situation', 'medical/_health_concerns': 'medical_health_concerns', 'other_medical/_health_concerns': 'other_medical_health_concerns', 'problematic_social_behaviours': 'problematic_social_behavior', 'streetscape_&_public_realm': 'streetscape_public_realm', 'other_streetscape_&_public_realm': 'other_streetscape_public_realm',
+                           'engagement_requested': 'engage_request', 'other_engagement_requested': 'other_engage_request', 'engagement_provided': 'engage_provided', 'channelling':'channelling', 'other_channelling':'other_channelling','report_completed_by': 'report_completed', 'assessment1': 'assessment', 'relevant_notes/_description_of_incident': 'notes_description', 'if_the_person_is_a_resident/_visitor/_person_with_ubn_have_you_o': 'previous_engagement', 'list_their_distinctive_characteristics/tags': 'yes_characteristics_tags', 'if_"_yes"_how_many_times_including_this_time': 'yes_number_times', 'x': 'x_longitude', 'y': 'y_latitude'})
 
     df_all = df_all.fillna('no_data')
 
@@ -154,8 +154,8 @@ def preprocess_and_load_survey_df():
 
     df_all['general_location'] = df_all['location']
 
-    df_all = df_all[['index', 'object_id', 'global_id', 'creation_date', 'creator', 'edit_date', 'editor', 'location'] + ['general_location'] + ['event_type', 'person_involved', 'what_situation', 'medical_health_concerns', 'problem_social_behavior',
-                                                                                                                                                 'streetscape_public_realm', 'engage_request', 'engage_provided', 'channeling', 'referrals', 'report_completed', 'assessment', 'notes_description', 'previous_engagement', 'yes_characteristics_tags', 'yes_number_times', 'x_longitude', 'y_latitude', 'hot_spot']]
+    df_all = df_all[['index', 'object_id', 'global_id', 'creation_date', 'creator', 'edit_date', 'editor', 'location'] + ['general_location'] + ['event_type', 'person_involved', 'what_situation', 'medical_health_concerns', 'problematic_social_behavior',
+                                                                                                                                                 'streetscape_public_realm', 'engage_request', 'engage_provided', 'channelling', 'referrals', 'report_completed', 'assessment', 'notes_description', 'previous_engagement', 'yes_characteristics_tags', 'yes_number_times', 'x_longitude', 'y_latitude', 'hot_spot']]
 
     # data cleaning to make a general location - so dashboard will have better more accurate information
     df_all['general_location'] = df_all['general_location'] = (
@@ -201,9 +201,38 @@ def preprocess_and_load_survey_df():
     df_all.loc[df_all['general_location'].str.contains(
         'nature’s food in store'), 'general_location'] = 'nature’s food and spice'
 
-    return df_all
 
+    return df_all
+def target_columns():
+    target_columns = ['event_type', 'person_involved',
+       'what_situation', 'medical_health_concerns', 'problematic_social_behavior',
+       'streetscape_public_realm', 'engage_request', 'engage_provided',
+       'channelling', 'referrals', 'report_completed', 'assessment',
+       'notes_description', 'previous_engagement','hot_spot']
+    return target_columns
+def input_data():
+    input_data = [
+        {'label':'Event Type', 'value': "event_type"},
+        {'label':'Person Involved', 'value': "person_involved"},
+        {'label':'What Situation', 'value': "what_situation"},
+        {'label':'Medical Health Concens', 'value': "medical_health_concerns"},
+        {'label':'Problematic Social Behavior', 'value': "problematic_social_behavior"},
+        {'label':'Streetscape', 'value': "streetscape_public_realm"},
+        {'label':'Engagement Request', 'value': "engage_request"},
+        {'label':'Engagement Provided', 'value': "engage_provided"},
+        {'label':'Channelling', 'value': "channelling"},
+        {'label':'Referrals', 'value': "referrals"},
+        {'label':'Report Completed', 'value': "report_completed"},
+        {'label':'Assessment', 'value': "assessment"},
+        {'label':'Notes Description', 'value': "notes_description"},
+        {'label':'Previous Engagement', 'value': "previous_engagement"},
+        {'label':'Hot Spot', 'value': "hot_spot"},
+    ]
+    return input_data
 
 if __name__ == '__main__':
     df = preprocess_and_load_survey_df()
-    print(df)
+#    print(df)
+
+
+#df.to_csv('df.csv')

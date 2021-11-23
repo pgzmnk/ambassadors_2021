@@ -10,8 +10,10 @@ import dash_bootstrap_components as dbc
 from mapclassify import classify
 import plotly.graph_objects as go
 from itertools import chain
+import geopandas as gpd
 
 import preprocess
+import get_poi
 
 from app import app
 
@@ -21,6 +23,9 @@ from app import app
 df_preprocess = preprocess.preprocess_and_load_survey_df()
 df_preprocess['count_events']=1
 df_preprocess['creation_date'] = pd.to_datetime(df_preprocess['creation_date'])
+
+df_places = get_poi.get_places_geoenriched()
+df_places = gpd.GeoDataFrame(df_places, geometry='geometry')
 
 def create_visual_1 (df,v_criteria):
     # return list from series of comma-separated strings
@@ -53,29 +58,8 @@ def create_visual_2 (df,v_criteria):
     df_visual_2=df_visual_2.groupby(['creation_date',v_criteria]).count().reset_index()
     return df_visual_2
 
-target_columns = ['event_type', 'person_involved',
-       'what_situation', 'medical_health_concerns', 'problem_social_behavior',
-       'streetscape_public_realm', 'engage_request', 'engage_provided',
-       'channeling', 'referrals', 'report_completed', 'assessment',
-       'notes_description', 'previous_engagement','hot_spot']
-
-input_data = [
-        {'label':'Event Type', 'value': "event_type"},
-        {'label':'Person Involved', 'value': "person_involved"},
-        {'label':'What Situation', 'value': "what_situation"},
-        {'label':'Medical Health Concens', 'value': "medical_health_concerns"},
-        {'label':'Problem Social Behavior', 'value': "problem_social_behavior"},
-        {'label':'Streetscape', 'value': "streetscape_public_realm"},
-        {'label':'Engagement Request', 'value': "engage_request"},
-        {'label':'Engagement Provided', 'value': "engage_provided"},
-        {'label':'Channeling', 'value': "channeling"},
-        {'label':'Referrals', 'value': "referrals"},
-        {'label':'Report Completed', 'value': "report_completed"},
-        {'label':'Assessment', 'value': "assessment"},
-        {'label':'Notes Description', 'value': "notes_description"},
-        {'label':'Previous Engagement', 'value': "previous_engagement"},
-        {'label':'Hot Spot', 'value': "hot_spot"},
-    ]
+target_columns = preprocess.target_columns()
+input_data = preprocess.input_data()
 
 category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[v_criteria])) for v_criteria in target_columns}
 
@@ -98,6 +82,8 @@ layout = dbc.Container([
                 multi=False,
                 value = input_data[1]['value'],
                 ),
+            html.Br(),
+            html.Hr(),
         ], width={'size': 5, 'offset': 0, 'order': 1}),
     ]),
     dbc.Row([              
@@ -112,8 +98,8 @@ layout = dbc.Container([
                       'watermark': True,
                       # 'modeBarButtonsToRemove': ['pan2d','select2d'],
                         },
-
-                style={'height':500, 'color': 'blue', 'fontSize': 20}),  
+                style={'height':500, 'color': 'blue', 'fontSize': 20}, 
+                ),  
         html.Hr(),
         ],width={'size': 5, 'offset': 0, 'order': 1}),
         dbc.Col([
@@ -145,9 +131,9 @@ layout = dbc.Container([
         dcc.Graph(id="table_app1", 
                 style={'height':1000, 'color': 'blue', 'fontSize': 20}), 
         html.Hr()],
-        width={'size': 5, 'offset': 0, 'order': 2})
+        width={'size': 7, 'offset': 0, 'order': 2})
     ]),
-# SECTION: Link to main Page
+ # SECTION: Link to main Page
     dbc.Row(
         dbc.Col(
             dcc.Link('Go to main page', href='/')
@@ -164,10 +150,10 @@ layout = dbc.Container([
     [dash.dependencies.Input('first-dropdown', 'value')]
 )
 def first_dropdown(first_dropdown_name):
-#    options_second_dropdown = [{'label': i.replace("_"," "), 'value': i} for i in category_dict[first_dropdown_name]]
+ #    options_second_dropdown = [{'label': i.replace("_"," "), 'value': i} for i in category_dict[first_dropdown_name]]
     df_visual_1 = create_visual_1(df_preprocess,first_dropdown_name)
     fig3 = px.histogram(df_visual_1, y=first_dropdown_name)
-    fig3.update_layout(margin={"r":10,"t":20,"l":0,"b":0}, clickmode='event+select')
+    fig3.update_layout(margin={"r":10,"t":50,"l":0,"b":0}, clickmode='event+select')
 
     return fig3, f'Values selected {first_dropdown_name.replace("_"," ").title()}'
 
@@ -186,12 +172,21 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
     if slct_data is None:
         df_visual_1 = create_visual_1(df_preprocess,first_dropdown_name)
         df_visual_2 = create_visual_2(df_visual_1,first_dropdown_name)
+
+        fig_polygons = px.choropleth_mapbox(df_places,
+                           geojson=df_places.geometry,
+                           locations=df_places.index,
+                           color=df_places.name,
+                           center={"lat": 51.037830, "lon": -113.981670},
+                           mapbox_style="open-street-map", 
+                           opacity=0.8, 
+                           zoom=14)
         fig2 = px.scatter_mapbox((df_visual_1), 
                             lat="y_latitude", lon="x_longitude", 
-                            color=first_dropdown_name, zoom=14, 
+                            color=first_dropdown_name 
                             )
-        fig2.update_layout(mapbox_style="open-street-map")
         fig2.update_traces(marker_size=10)
+        fig_map = fig_polygons.add_traces(fig2.data)
 
         fig4 = px.sunburst(df_visual_1, path=[first_dropdown_name,'location'], values='count_events')
         fig4.update_layout(margin={"r":0,"t":10,"l":0,"b":10})
@@ -219,8 +214,7 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
                 dict(count=1, label="1y", step="year", stepmode="backward"),
                 dict(step="all")
             ])
-        )
-    )
+        )  )
         table_list = df_visual_1[first_dropdown_name].unique().tolist()
         fig5 = go.Figure(data=[go.Table(
         header=dict(values=[table_list,'location', 'Type of Event'],
@@ -231,7 +225,7 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
                    align='left')) ])
         fig5.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
-        return fig2, fig4, fig, fig5
+        return fig_map, fig4, fig, fig5
     else:
         #print(f'hover data: {hoverInfo}')
         # print(hov_data['points'][0]['customdata'][0])
@@ -242,16 +236,25 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
         dfff=pd.DataFrame(slct_data['points'])
         list_y = dfff['y'].tolist()      
 
-    #    hover = hoverInfo['points'][0]['y']
-    #    df_visual_1 = df_visual_1[df_visual_1[first_dropdown_name]==hover]
+     #    hover = hoverInfo['points'][0]['y']
+     #    df_visual_1 = df_visual_1[df_visual_1[first_dropdown_name]==hover]
         df_visual_1 = df_visual_1[df_visual_1[first_dropdown_name].isin(list_y)]
         df_visual_2 = create_visual_2(df_visual_1,first_dropdown_name)
 
+        fig_polygons = px.choropleth_mapbox(df_places,
+                           geojson=df_places.geometry,
+                           locations=df_places.index,
+                           color=df_places.name,
+                           center={"lat": 51.037830, "lon": -113.981670},
+                           mapbox_style="open-street-map",
+                           opacity=0.8, 
+                           zoom=14)
         fig2 = px.scatter_mapbox((df_visual_1), 
                             lat="y_latitude", lon="x_longitude", 
-                            color=first_dropdown_name, zoom=14 )
-        fig2.update_layout(mapbox_style="open-street-map")
+                            color=first_dropdown_name 
+                            )
         fig2.update_traces(marker_size=10)
+        fig_map = fig_polygons.add_traces(fig2.data)      
 
         fig4 = px.sunburst(df_visual_1, path=[first_dropdown_name,'location'], values='count_events')
         fig4.update_layout(margin={"r":0,"t":10,"l":0,"b":10})
@@ -279,8 +282,7 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
                 dict(count=1, label="1y", step="year", stepmode="backward"),
                 dict(step="all")
             ])
-        )
-    )
+        ))
         table_list2 = df_visual_1[first_dropdown_name].unique().tolist()
         fig5 = go.Figure(data=[go.Table(
         header=dict(values=[table_list2,'location', 'Type of Event'],
@@ -291,7 +293,7 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
                    align='left')) ])
         fig5.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
-        return fig2, fig4, fig, fig5
+        return fig_map, fig4, fig, fig5
 
 
 
