@@ -1,3 +1,4 @@
+import pandas as pd
 import subprocess
 import sys 
 
@@ -8,10 +9,13 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
+import preprocess
 
 # Path to `update data` script 
 SCRIPT_TO_EXECUTE = 'survey123_to_postgres.py'
 
+df_preprocess = preprocess.preprocess_and_load_survey_df()
+#df_preprocess['creation_date'] = pd.to_datetime(df_preprocess['creation_date'])
 
 # Style of sidebar
 SIDEBAR_STYLE = {
@@ -22,41 +26,61 @@ SIDEBAR_STYLE = {
     "width": "16rem",
     "padding": "2rem 1rem",
     "background-color": "#f8f9fa",
+    "margin-top": "80px"
 }
 
+total_records = df_preprocess.shape[0]
+totals = f'{str(total_records)}'
+
+last_date = df_preprocess['creation_date'].max()
+last_date = pd.to_datetime(pd.Series(last_date))
+last_date =last_date.dt.strftime('%B %d, %Y')
 
 # Sidebar
 sidebar = html.Div(
     [
-        html.H2("Sidebar", className="display-4"),
-        html.Hr(),
-        html.P(
-            "A simple sidebar layout with navigation links", className="lead"
-        ),
+       # html.Img(src='/assets/12csi.png'),
+        html.Br(),
         dbc.Nav(
             [
                 dbc.NavLink('Home', href='/', active="exact"),
-                dbc.NavLink('Page 1', href='/apps/app1', active="exact"),
-                dbc.NavLink('Page 2', href='/apps/app2', active="exact"),
-                dbc.NavLink('Page 3', href='/apps/app3', active="exact"),
-                dbc.NavLink('Page 4', href='/apps/app4', active="exact"),
-                dbc.NavLink('Page 5', href='/apps/app5', active="exact"),
-                dbc.NavLink('Page 6', href='/apps/app6', active="exact"),
-                dbc.NavLink('Page 7', href='/apps/app7', active="exact"),
+                dbc.NavLink('1.a. Interactive Data', href='/apps/app1', active="exact"),
+                dbc.NavLink('1.b. Interactive Data', href='/apps/app2', active="exact"),
+                dbc.NavLink('2. Events and Emergency Services', href='/apps/app3', active="exact"),
+                dbc.NavLink('3. Engagement Provided', href='/apps/app4', active="exact"),
+                dbc.NavLink('4. Visitors - Type of Events', href='/apps/app5', active="exact"),
+                dbc.NavLink('5. Calgary Police Intervention - Type of Events', href='/apps/app6', active="exact"),
+                dbc.NavLink('6. Building Rapport', href='/apps/app7', active="exact"),
+                dbc.NavLink('7. Hot Spots', href='/apps/app8', active="exact"),
                 dbc.Button("Update dataset from Survey123'", color="success", id='the-button', className="me-1"),
 
             ],
             vertical=True,
             pills=True,
         ),
-        html.Div(id='body-div', className='card'),
+        html.Br(),
+        
+        dbc.Card([
+                dbc.CardHeader(html.H5("TOTAL RECORDS")),
+                dbc.CardBody([
+                    html.H3(id="total_records", children=totals, style={'fontWeight':'bold', 'textAlign':'center'})
+                ]), 
+                dbc.CardFooter([
+                    html.P('Last update:'), 
+                    html.P(f'{last_date[0]}')
+                ]),
+                ], color="primary", inverse=True),
+        html.Br(),
+        html.Div(id='body-div', 
+        ),
+
     ],
     style=SIDEBAR_STYLE,
 )
 
-
 # Top navigation bar
-DASHBOARD_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
+DASHBOARD_LOGO1 = "/assets/12csi.png"
+DASHBOARD_LOGO2 = "/assets/INTL_AVE_17.png"
 navbar = dbc.Navbar(
     dbc.Container(
         [
@@ -64,13 +88,14 @@ navbar = dbc.Navbar(
                 # Use row and col to control vertical alignment of logo / brand
                 dbc.Row(
                     [
-                        dbc.Col(html.Img(src=DASHBOARD_LOGO, height="30px")),
-                        dbc.Col(dbc.NavbarBrand("Navbar", className="ms-2")),
+                        dbc.Col(html.Img(src=DASHBOARD_LOGO1, height="70px")),
+                        dbc.Col(html.Img(src=DASHBOARD_LOGO2, height="70px")),
+                        dbc.Col(dbc.NavbarBrand("East Calgary Ambassadors", className="ms-2")),
                     ],
-                    align="center",
+                    #align="center",
                     className="g-0",
                 ),
-                href="https://plotly.com",
+                href="/",
                 style={"textDecoration": "none"},
             ),
             dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
@@ -91,3 +116,9 @@ def update_output(n_clicks):
         raise PreventUpdate
     else:
         return "Updated."
+
+
+# Callback for Total Records
+
+
+

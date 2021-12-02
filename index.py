@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 from app import app
-from apps import app1, app2, app3, app4, app5, app6, app7
+from apps import app1, app2, app3, app4, app5, app6, app7, app8
 from components import navigation
 
 
@@ -25,25 +25,42 @@ app.layout = html.Div([
 
 index_page = html.Div([
     html.Br(),
-    html.H1( children='East Calgary Ambassadors', 
+    html.H1(children='East Calgary Ambassadors', 
             #className='text-center text-primary',
             id='home-page-title'),
-    html.H3('Menu', style={'font-size': '30px',  'textAlign':'center'}),
-    dcc.Link('Page 1 - Analysis Dashboard with Interactive Graph', href='/apps/app1',
-            className='home-links'),
-    dcc.Link('Page 2 - Analysis Dashboard with Dropdown', href='/apps/app2',
-            className='home-links'), 
-    dcc.Link('Page 3 - CPS, EMS, Fire Involved', href='/apps/app3',
-            className='home-links'),
-    dcc.Link('Page 4 - Location and Channelling', href='/apps/app4',
-            className='home-links'),
-    dcc.Link('Page 5 - Visitors Interactions, Incidents and Emergencies', href='/apps/app5',
-            className='home-links'),
-    dcc.Link('Page 6 - Analysis of CPS situations', href='/apps/app6',
-            className='home-links'),
-    dcc.Link('Page 7 - "Building Rapport" situations', href='/apps/app7',
-            className='home-links'),
+    dbc.Row(
+    dbc.Col(html.Hr(style={'border': "3px solid #C88141"}),width=12),
+    ),
+    html.H4('WHO WE ARE'),
+    dbc.Row(
+    dbc.Col(html.Hr(style={'border': "3px solid #8C001A"}),width=12)
+    ),
+    html.P('The Ambassador Program is a joint effort of the International Avenue BRZ and 12 Communities Safety Initiative (12CSI).'),
+    html.P('We are here to help businesses, residents and all people that live, work, and visit the communities along the avenue.'),
+    html.Br(),
+    dbc.Row(
+    dbc.Col(html.Hr(style={'border': "3px solid #151B8D"}),width=12)
+    ),
+    html.H4('DASHBOARD OBJECTIVES'),  
+    dbc.Row(
+    dbc.Col(html.Hr(style={'border': "3px solid #254117"}),width=12)
+    ),   
+    html.P('To create a data-driven story to better understand and share the unique needs and opportunities of the community.'),
+    html.Br(),
+    dbc.Row(
+    dbc.Col(html.Hr(style={'border': "3px solid yellow"}),width=12)
+    ),  
+    html.H4('HOW THIS DASHBOARD WORKS'),
+    dbc.Row(
+    dbc.Col(html.Hr(style={'border': "3px solid #461B7E"}),width=12)
+    ),  
+    html.P('1.a. Select category from the dropdown menu, then click on sub-categories from histogram chart'),
+    html.P('1.b. Select category from the first dropdown menu, then select sub-categories from second dropdown menu'),
+    html.P('2 through 7 select date ranges to display interactive maps and data results'),
+    html.Br(),
+    html.P('Click green update button on left side to load the latest data'), 
 ], style={'fontWeight':'bold', 'textAlign':'left'})
+
 
 @app.callback(Output('page-content', 'children'),
               Input('url', 'pathname'))
@@ -62,6 +79,8 @@ def display_page(pathname):
         return app6.layout
     elif pathname == '/apps/app7':
         return app7.layout
+    elif pathname == '/apps/app8':
+        return app8.layout
     else:
         return index_page
 

@@ -6,6 +6,7 @@ import dash_bootstrap_components as dbc
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import date
 from itertools import chain
 
@@ -56,11 +57,15 @@ input_data = preprocess.input_data()
 category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[v_criteria])) for v_criteria in target_columns}
 
 layout = dbc.Container([
+
     dbc.Row([
         dbc.Col([
-            html.H1("Event Types and Community Visitors", style={'textAlign':'left'})
+            html.H1("Hot Spots on International Avenue", style={'textAlign':'left'})
         ], width={'size': 10})
     ]),
+
+
+
     dbc.Row([
         dbc.Col([
             html.H4("SELECT RANGE DATES:"),
@@ -78,102 +83,93 @@ layout = dbc.Container([
                 initial_visible_month=df_preprocess['creation_date'].max(),
                 date=df_preprocess['creation_date'].max(),
             ),
-        ]),
+        ])
     ]),
+
 
     dbc.Row(
         dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
     ),
-# SECTION: Visitors Interactions, Incidents, Emergencies
+
     dbc.Row([
         dbc.Col([
             dbc.Card([
-                dbc.CardBody([
-                    html.H5("Interactions, Incidents and Emergencies experienced by Visitors")
-                ])
-            ]), 
+                    dbc.CardBody([
+                        html.H5("Hot Spots (commonly active areas) are indicated by different colored polygons in the map below")
+                    ])
+                ]), 
             html.Br(),
         ], width={'size': 12})
     ]),
+
+
+
     dbc.Row([
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader(html.H5("Interactions")),
-                dbc.CardBody([
-                            html.H2(id="interactions", children="", style={'fontWeight':'bold', 'textAlign':'center'})
-                        ])
+            dbc.CardBody([
+                dcc.Graph(id="hotspot-map1", config={'displayModeBar': True})
             ])
-        ], width=3),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader(html.H5("Incidents")),
-                dbc.CardBody([
-                    html.H2(id="incidents", children="", style={'fontWeight':'bold','textAlign':'center'})
-                ])
-            ])
-        ], width=3),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader(html.H5("Emergencies")),
-                dbc.CardBody([
-                    html.H2(id="emergencies", children="", style={'fontWeight':'bold', 'textAlign':'center'})
-                ])
-            ])
-        ], width=3),
+        ])
+        ], width=12)
     ]),
-    html.Br(),
-    dbc.Row([
-            dbc.Col([
-                dbc.Card([
-                    dbc.CardBody([
-                        #html.P("Map of Visitor's Interactions, Incidents and Emergencies"),
-                        dcc.Graph(id="map1", config={'displayModeBar': True}
-                                    )
-                    ]),
-                    #dbc.CardFooter("Interactions, Incidents and Emergencies with Visitors"),
-                ])
-            ], width=12),
-    ]),
-    
-    
-
-
-    dbc.Row(
-    dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
-    ),
-
 ])
 
-# Update Map ***********************************************************
 @app.callback(
-    Output('interactions','children'),
-    Output('incidents','children'),
-    Output('emergencies','children'),
-    # Output('total_records','children'),
-    Output('map1','figure'),
+    Output('hotspot-map1','figure'),
     Input('my-date-picker-start','date'),
     Input('my-date-picker-end','date'),
 )
 def update_graph(start_date, end_date):
     dff = df_preprocess[df_preprocess.creation_date.between(start_date, end_date)]
-    dff = dff[dff['person_involved'].str.contains('Visitor', regex=False)]
 
-    emergency_count = dff['event_type'].value_counts()['Emergency']
-    emergencies = f'{str(emergency_count)}'
-
-    interaction_count = dff['event_type'].value_counts()['Interaction']
-    interactions = f'{str(interaction_count)}'
-
-    incident_count = dff['event_type'].value_counts()['Incident']
-    incidents = f'{str(incident_count)}'
-
-    total_records = dff.shape[0]
-    totals = f'{str(total_records)}'
+    df_hotspots = dff[dff['hot_spot'] != 'not in \'hotspot\'']
     
-    fig2 = px.scatter_mapbox(dff, 
-                            lat="y_latitude", lon="x_longitude", hover_name='event_type', 
-                            color='event_type', hover_data=["event_type", "location"], zoom=14, height=350)
-    fig2.update_layout(mapbox_style="open-street-map")
-    fig2.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    all_points_map = go.Scattermapbox(
+        lat=dff['y_latitude'],
+        lon=dff['x_longitude'],
+        name='All events',
+        mode='markers',
+        marker=go.scattermapbox.Marker(
+            size=10,
+            opacity=0.8,
+            color='blue'
+        )
+    )
+    
+    maps_list = [all_points_map]
+    
+    for hs_loc in df_hotspots['hot_spot'].unique():
+        df_hotspot_local = df_hotspots[df_hotspots['hot_spot'] == hs_loc]
+        
+        # draw rectangle
+        lats = list(df_hotspot_local['y_latitude'])
+        lons = list(df_hotspot_local['x_longitude'])
+        
+        lat_min, lat_max = min(lats), max(lats)
+        lon_min, lon_max = min(lons), max(lons)
+        
+        fig_temp = go.Scattermapbox(
+            mode = "lines", fill = "toself",
+            lat=[lat_min, lat_min, lat_max, lat_max, lat_min],
+            lon=[lon_min, lon_max, lon_max, lon_min, lon_min],
+            name=hs_loc
+        )
+        
+        maps_list.append(fig_temp)
 
-    return interactions, incidents, emergencies, fig2
+    fig = go.Figure(maps_list)
+    fig.update_layout(mapbox_style="open-street-map")
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig.update_layout(
+        hovermode='closest',
+        mapbox=dict(
+            center=go.layout.mapbox.Center(
+                lat=dff['y_latitude'].mean(),
+                lon=dff['x_longitude'].mean()
+            ),
+            zoom=14
+        )
+    )
+
+    return fig

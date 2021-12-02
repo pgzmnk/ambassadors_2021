@@ -11,6 +11,7 @@ from mapclassify import classify
 import plotly.graph_objects as go
 from itertools import chain
 import geopandas as gpd
+import dash_table as dt
 
 import preprocess
 import get_poi
@@ -65,30 +66,41 @@ category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[
 
 layout = dbc.Container([
     dbc.Row(
-        dbc.Col(
-            html.H1( id='title_header', 
-           # className='text-center text-primary, mb-3'
-           )
-            )),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H2( id='title_header',)
+                ])
+            ]), 
+            html.Br(), 
+        ], width={'size': 12, 'offset': 0, 'order': 1})),
     # Multiple-value dropdown
     dbc.Row([
         dbc.Col([
-            html.H3('Select a category to evaluate:', className='text_center',
+            dbc.Card([
+                dbc.CardBody([
+                    html.H4('Select a category:', className='text_center',
             # style={'color':'blue','fontSize':'50'}
-             ),
-            dcc.Dropdown(
-                id='first-dropdown',
-                options = input_data,
-                multi=False,
-                value = input_data[1]['value'],
-                ),
+                            ), 
+                    dcc.Dropdown( id='first-dropdown',
+                    options = input_data,
+                    multi=False,
+                    value = input_data[1]['value'],
+                    ),
+                ])
+            ]),
             html.Br(),
-            html.Hr(),
-        ], width={'size': 5, 'offset': 0, 'order': 1}),
+        ], width={'size': 6, 'offset': 0, 'order': 1}),
+
     ]),
+
+    #Histogram and Sunburst
     dbc.Row([              
         dbc.Col([
-        dcc.Graph(id='Histogram',figure={}, clickData=None, hoverData=None, 
+            dbc.Card([
+                dbc.CardHeader(html.H6('Histogram: click on one or more bars to select sub-categories')),
+                dbc.CardBody([
+                    dcc.Graph(id='Histogram',figure={}, clickData=None, hoverData=None, 
                     config={
                       'staticPlot': False,     # True, False
                       'scrollZoom': True,      # True, False
@@ -97,41 +109,60 @@ layout = dbc.Container([
                       'displayModeBar': True,  # True, False, 'hover'
                       'watermark': True,
                       # 'modeBarButtonsToRemove': ['pan2d','select2d'],
-                        },
+                        }, 
                 style={'height':500, 'color': 'blue', 'fontSize': 20}, 
-                ),  
-        html.Hr(),
-        ],width={'size': 5, 'offset': 0, 'order': 1}),
+                ), 
+                ])
+            ]), 
+            html.Br()
+        ],width={'size': 6, 'offset': 0, 'order': 1}),
         dbc.Col([
-        dcc.Graph(id="sunburst_app1", 
-                style={'height':500, 'color': 'blue', 'fontSize': 20}), 
-        html.Hr()],
-        width={'size': 7, 'offset': 0, 'order': 2}),
-    ]),
+            dbc.Card([
+                dbc.CardHeader(html.H6("Sunburst")),
+                dbc.CardBody([
+                    dcc.Graph(id="sunburst_app1", 
+                    style={'height':500, 'color': 'blue', 'fontSize': 20}),
+                ])
+            ]), 
+            html.Br()
+        ], width={'size': 6, 'offset': 0, 'order': 2})
+        ]),
     dbc.Row([
-            dbc.Col([
-            html.H3('Interactive Map', className='text_center', 
-            #style={'color':'blue','fontSize':'20'}
-            ),
-            dcc.Graph(id="map_app1",  
-                    style={'height':500, 'color': 'blue', 'fontSize': 20}, 
+        dbc.Col([
+            dbc.Card([
+       #         dbc.CardHeader(html.H6("Interactive Map")),
+                dbc.CardBody([
+                    dcc.Graph(id="map_app1",  
+                    style={'height':400, 'color': 'blue', 'fontSize': 20}, 
                     ), 
-            html.Hr()],
+                ])
+            ]),
+            html.Br()
+            ], width={'size': 12, 'offset': 0, 'order': 1}),
+    ]),
+    # Bar chart Layout
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader(html.H6("Count per Day")),
+                dbc.CardBody([
+                    dcc.Graph(id="bar-chart_app1", 
+                        style={'height':500, 'color': 'blue', 'fontSize': 20})
+                ])
+            ]), 
+            html.Hr()], 
             width={'size': 12, 'offset': 0, 'order': 1}),
     ]),
+    # Table  
     dbc.Row([
         dbc.Col([
-        dcc.Graph(id="bar-chart_app1", 
-                style={'height':500, 'color': 'blue', 'fontSize': 20}), 
-        html.Hr()],
-        width={'size': 12, 'offset': 0, 'order': 1}),
-    ]),  
-    dbc.Row([
-        dbc.Col([
-        dcc.Graph(id="table_app1", 
-                style={'height':1000, 'color': 'blue', 'fontSize': 20}), 
-        html.Hr()],
-        width={'size': 7, 'offset': 0, 'order': 2})
+            dbc.Card([
+                dbc.CardBody([
+                    html.Div(id="table")
+                ])
+            ]),
+            html.Hr()],
+        width={'size': 12, 'offset': 0, 'order': 1})
     ]),
  # SECTION: Link to main Page
     dbc.Row(
@@ -150,25 +181,25 @@ layout = dbc.Container([
     [dash.dependencies.Input('first-dropdown', 'value')]
 )
 def first_dropdown(first_dropdown_name):
- #    options_second_dropdown = [{'label': i.replace("_"," "), 'value': i} for i in category_dict[first_dropdown_name]]
-    df_visual_1 = create_visual_1(df_preprocess,first_dropdown_name)
-    fig3 = px.histogram(df_visual_1, y=first_dropdown_name)
-    fig3.update_layout(margin={"r":10,"t":50,"l":0,"b":0}, clickmode='event+select')
 
-    return fig3, f'Values selected {first_dropdown_name.replace("_"," ").title()}'
+    df_visual_1 = create_visual_1(df_preprocess,first_dropdown_name)
+    fig3 = px.histogram(df_visual_1, y=first_dropdown_name, template='seaborn',)
+    fig3.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, clickmode='event+select')
+
+    return fig3, f'Category selected: {first_dropdown_name.replace("_"," ").title()}'
 
 @app.callback(
     dash.dependencies.Output('map_app1','figure'),
     dash.dependencies.Output('sunburst_app1','figure'),
     dash.dependencies.Output('bar-chart_app1','figure'), 
-    dash.dependencies.Output('table_app1','figure'),   
+    dash.dependencies.Output('table','children'),   
     dash.dependencies.Input('first-dropdown','value'),
-    dash.dependencies.Input('Histogram', 'hoverData'),
-    dash.dependencies.Input('Histogram', 'clickData'),
+ #   dash.dependencies.Input('Histogram', 'hoverData'),
+  #  dash.dependencies.Input('Histogram', 'clickData'),
     dash.dependencies.Input('Histogram', 'selectedData'),
     )
-def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
-
+def update_map(first_dropdown_name, slct_data):
+#, hoverInfo, clk_data
     if slct_data is None:
         df_visual_1 = create_visual_1(df_preprocess,first_dropdown_name)
         df_visual_2 = create_visual_2(df_visual_1,first_dropdown_name)
@@ -179,30 +210,32 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
                            color=df_places.name,
                            center={"lat": 51.037830, "lon": -113.981670},
                            mapbox_style="open-street-map", 
-                           opacity=0.8, 
-                           zoom=14)
+                           opacity=0.8,  
+                           zoom=15, )
         fig2 = px.scatter_mapbox((df_visual_1), 
                             lat="y_latitude", lon="x_longitude", 
-                            color=first_dropdown_name 
+                            color=first_dropdown_name, template='seaborn', 
                             )
         fig2.update_traces(marker_size=10)
         fig_map = fig_polygons.add_traces(fig2.data)
 
-        fig4 = px.sunburst(df_visual_1, path=[first_dropdown_name,'location'], values='count_events')
+        dff_visual_1 = df_visual_1[df_visual_1['location']!='no_data']
+        fig4 = px.sunburst(dff_visual_1, path=[first_dropdown_name,'location'], 
+                values='count_events', template='seaborn')
         fig4.update_layout(margin={"r":0,"t":10,"l":0,"b":10})
 
         fig = px.bar(df_visual_2, x="creation_date", y="count_events", 
-        color=first_dropdown_name, title="Count per Day")
-        fig.update_layout(
-            font_family="Courier New",
-            font_color="blue",
-            title_font_family="Arial",
-            xaxis_title="Creation Date",
-            yaxis_title="Count",
-            legend_title="Categories",
-            title_font_color="purple",
-            legend_title_font_color="purple"
-        )
+        color=first_dropdown_name, template='seaborn')
+        # fig.update_layout(
+        #     font_family="Courier New",
+        #     font_color="blue",
+        #     title_font_family="Arial",
+        #     xaxis_title="Creation Date",
+        #     yaxis_title="Count",
+        #     legend_title="Categories",
+        #     title_font_color="purple",
+        #     legend_title_font_color="purple"
+        # )
         fig.update_xaxes(
         rangeslider_visible=True,
         rangeselector=dict(
@@ -215,17 +248,27 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
                 dict(step="all")
             ])
         )  )
-        table_list = df_visual_1[first_dropdown_name].unique().tolist()
-        fig5 = go.Figure(data=[go.Table(
-        header=dict(values=[table_list,'location', 'Type of Event'],
-                    fill_color='paleturquoise',
-                    align='left'),
-        cells=dict(values=[df_visual_1[first_dropdown_name], df_visual_1.location, df_visual_1.event_type],
-                   fill_color='lavender',
-                   align='left')) ])
-        fig5.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
-        return fig_map, fig4, fig, fig5
+        table_app1=dt.DataTable(
+            data = df_visual_1.to_dict('rows'),
+            columns = [{"name": i, "id": i, "hideable" : True} for i in (df_visual_1.columns)],
+            editable=False,
+            filter_action="native",
+            sort_action="native",
+            sort_mode="multi",
+            column_selectable="single",
+           # row_selectable="multi",
+            row_deletable=False,
+            selected_columns=[],
+            selected_rows=[],
+            page_action="native",
+            page_current= 0,
+            page_size= 20,
+            style_table={'overflowX': 'auto'},
+            style_data={'whiteSpace': 'normal', 'height': 'auto', 'lineHeight': '15px'}
+            )
+
+        return fig_map, fig4, fig, table_app1
     else:
         #print(f'hover data: {hoverInfo}')
         # print(hov_data['points'][0]['customdata'][0])
@@ -248,29 +291,31 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
                            center={"lat": 51.037830, "lon": -113.981670},
                            mapbox_style="open-street-map",
                            opacity=0.8, 
-                           zoom=14)
+                           zoom=15)
         fig2 = px.scatter_mapbox((df_visual_1), 
                             lat="y_latitude", lon="x_longitude", 
-                            color=first_dropdown_name 
+                            color=first_dropdown_name, template='seaborn',   
                             )
         fig2.update_traces(marker_size=10)
         fig_map = fig_polygons.add_traces(fig2.data)      
 
-        fig4 = px.sunburst(df_visual_1, path=[first_dropdown_name,'location'], values='count_events')
-        fig4.update_layout(margin={"r":0,"t":10,"l":0,"b":10})
+        dff_visual_1 = df_visual_1[df_visual_1['location']!='no_data']
+        fig4 = px.sunburst(dff_visual_1, path=[first_dropdown_name,'location'], 
+                    values='count_events', template='seaborn')
+        fig4.update_layout(margin={"r":0,"t":0,"l":0,"b":10})
 
         fig = px.bar(df_visual_2, x="creation_date", y="count_events", 
-        color=first_dropdown_name, title="Count per Day")
-        fig.update_layout(
-            font_family="Courier New",
-            font_color="blue",
-            title_font_family="Arial",
-            xaxis_title="Creation Date",
-            yaxis_title="Count",
-            legend_title="Categories",
-            title_font_color="purple",
-            legend_title_font_color="purple"
-        )
+        color=first_dropdown_name, template='seaborn')
+        # fig.update_layout(
+        #     font_family="Courier New",
+        #     font_color="blue",
+        #     title_font_family="Arial",
+        #     xaxis_title="Creation Date",
+        #     yaxis_title="Count",
+        #     legend_title="Categories",
+        #     title_font_color="purple",
+        #     legend_title_font_color="purple"
+        # )
         fig.update_xaxes(
         rangeslider_visible=True,
         rangeselector=dict(
@@ -283,22 +328,24 @@ def update_map(first_dropdown_name, hoverInfo, clk_data, slct_data):
                 dict(step="all")
             ])
         ))
-        table_list2 = df_visual_1[first_dropdown_name].unique().tolist()
-        fig5 = go.Figure(data=[go.Table(
-        header=dict(values=[table_list2,'location', 'Type of Event'],
-                    fill_color='paleturquoise',
-                    align='left'),
-        cells=dict(values=[df_visual_1[first_dropdown_name], df_visual_1.location, df_visual_1.event_type],
-                   fill_color='lavender',
-                   align='left')) ])
-        fig5.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        
+        table_app1=dt.DataTable(
+            data = df_visual_1.to_dict('rows'),
+            columns = [{"name": i, "id": i, "hideable" : True} for i in (df_visual_1.columns)],
+            editable=False,
+            filter_action="native",
+            sort_action="native",
+            sort_mode="multi",
+            column_selectable="single",
+            #row_selectable="multi",
+            row_deletable=False,
+            selected_columns=[],
+            selected_rows=[],
+            page_action="native",
+            page_current= 0,
+            page_size= 20,
+            style_table={'overflowX': 'auto'},
+            style_data={'whiteSpace': 'normal', 'height': 'auto', 'lineHeight': '15px'}
+        )
 
-        return fig_map, fig4, fig, fig5
-
-
-
-
-
-
-
-
+        return fig_map, fig4, fig, table_app1

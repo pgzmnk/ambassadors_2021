@@ -55,122 +55,92 @@ input_data = preprocess.input_data()
 category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[v_criteria])) for v_criteria in target_columns}
 
 layout = dbc.Container([
-    dbc.Row([
+     dbc.Row([
         dbc.Col([
-            html.H1("Engagement Provided", style={'textAlign':'center'})
-        ], width={'size': 10})
-    ]),
-    
-    dbc.Row([
-        dbc.Col([
-        dbc.Card([
-            dbc.CardBody([
-                html.H4("Select range dates:"),
-                dcc.DatePickerSingle(
-                    id='my-date-picker-start',
-                    min_date_allowed=df_preprocess['creation_date'].min(),
-                    max_date_allowed=df_preprocess['creation_date'].max(),
-                    initial_visible_month=date(2021, 9, 14),
-                    date=date(2021, 9, 14)
-                ),
-                dcc.DatePickerSingle(
-                    id='my-date-picker-end',
-                    min_date_allowed=df_preprocess['creation_date'].min(),
-                    max_date_allowed=df_preprocess['creation_date'].max(),
-                    initial_visible_month=df_preprocess['creation_date'].max(),
-                    date=df_preprocess['creation_date'].max(),
-                ),
-            ])
-        ])
-        ], width=12),
+            dbc.Card([
+                dbc.CardBody([
+                    html.H2("Engagement Provided")
+                ])
+            ]), 
+            html.Br(),
+        ], width={'size': 12})
     ]),
 
-    dbc.Row(
-        dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
-    ),
-# SECTION: Wellness_Check, Emergency_Services_Channelling, Provided_Naloxone_Kit, Provided_Information
     dbc.Row([
         dbc.Col([
-            dbc.Row([
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Wellness Check"),
-                            html.H2(id="Wellness_Check", children="", style={'fontWeight':'bold','textAlign':'center'})
-                        ])
-                    ])
-                ], width=4),
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Emergency Services Channelling"),
-                            html.H2(id="Emergency_Services_Channelling", children="", style={'fontWeight':'bold','textAlign':'center'})
-                        ])
-                    ])
-                ], width=4),
-
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Provided Naloxone Kit"),
-                            html.H2(id="Provided_Naloxone_Kit", children="", style={'fontWeight':'bold', 'textAlign':'center'})
-                        ])
-                    ])
-                ], width=4),
-
-                dbc.Col([
-                dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Provided Information"),
-                            html.H2(id="Provided_Information", children="", style={'fontWeight':'bold', 'textAlign':'center'})
-                        ])
-                    ])
-                ], width=4),
-
-
-            ], className="mb-3"),
-
-            dbc.Row([
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.H5("Notes"),
-                            html.H5(id='concluding-remarks', children="Engagement Provided plotted on map sorted by color",
-                                    style={'fontWeight':'bold', 'textAlign':'center'})
-                        ])
-                    ])
-                ], width=12)
-            ], className="mb-3")
-        ], width=4),
-
-        dbc.Col([
-            dbc.Row([
-                dbc.Col([
-                    dbc.Card([
-                        dbc.CardBody([
-                            html.P("Engagement Provided is Wellness Checks, Emergency Channelling, Providing Naloxone Kits & Information"),
-                            dcc.Graph(id="map_app4", config={'displayModeBar': True}
-                                      )
-                        ])
-                    ])
-                ], width=12),
-            ])
-        ], width=8)
-    ],className="mt-3", justify='center'),
-
+            html.H4("SELECT RANGE DATES:"),
+            dcc.DatePickerSingle(
+                id='my-date-picker-start',
+                min_date_allowed=df_preprocess['creation_date'].min(),
+                max_date_allowed=df_preprocess['creation_date'].max(),
+                initial_visible_month=date(2021, 9, 14),
+                date=date(2021, 9, 14)
+            ),
+            dcc.DatePickerSingle(
+                id='my-date-picker-end',
+                min_date_allowed=df_preprocess['creation_date'].min(),
+                max_date_allowed=df_preprocess['creation_date'].max(),
+                initial_visible_month=df_preprocess['creation_date'].max(),
+                date=df_preprocess['creation_date'].max(),
+            ),
+        ], width={'size': 6, 'offset': 0, 'order': 1}),
+    ]),
     dbc.Row(
     dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
     ),
-# SECTION: Link to main Page
+
+ # SECTION: Wellness_Check, Emergency_Services_Channelling, Provided_Naloxone_Kit, Provided_Information
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader(html.H5("Wellness Check")),
+                dbc.CardBody([
+                    html.H3(id="Wellness_Check", children="", style={'fontWeight':'bold', 'textAlign':'center'})
+                ])
+            ])
+        ], width=3),
+        dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader(html.H5("Emergency Services Channelling")),
+                    dbc.CardBody([
+                         html.H3(id="Emergency_Services_Channelling", children="", style={'fontWeight':'bold','textAlign':'center'})
+                    ])
+                ])
+        ], width=3),
+        dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader(html.H5("Provided Naloxone Kit")),
+                    dbc.CardBody([
+                         html.H3(id="Provided_Naloxone_Kit", children="", style={'fontWeight':'bold','textAlign':'center'})
+                    ])
+                ])
+         ], width=3),
+        dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader(html.H5("Provided Information")),
+                    dbc.CardBody([
+                         html.H3(id="Provided_Information", children="", style={'fontWeight':'bold','textAlign':'center'})
+                    ])
+                ])
+         ], width=3),
+     ]),
+    html.Br(),
+    dbc.Row([
+         dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        dcc.Graph(id="map_app4", config={'displayModeBar': True}),
+                    ]),
+                    dbc.CardFooter("Note: Engagement Provided is Wellness Checks, Emergency Channelling, Providing Naloxone Kits & Information"),
+                ])
+         ], width=12)
+     ]),
     dbc.Row(
-        dbc.Col(
-            dcc.Link('Go to main page', href='/')
-        )
-    ),
-    dbc.Row(
-        dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
-    ),
-], fluid=True, style={'backgroundColor':'3px solid gray'})
+    dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
+    ),  
+
+], fluid=True,
+)
 
 # Update Map ***********************************************************
 @app.callback(

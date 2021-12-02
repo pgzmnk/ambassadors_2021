@@ -58,32 +58,30 @@ category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[
 layout = dbc.Container([
     dbc.Row([
         dbc.Col([
-            html.H1("Dashboard Q9", style={'textAlign':'center'})
+            html.Br(),
+            html.H1("Building Rapport Analysis", style={'textAlign':'left'}),
+            #html.Br(),
         ])
     ]),
     
     dbc.Row([
         dbc.Col([
-        dbc.Card([
-            dbc.CardBody([
-                html.H4("Select range dates:"),
-                dcc.DatePickerSingle(
-                    id='my-date-picker-start',
-                    min_date_allowed=df_preprocess['creation_date'].min(),
-                    max_date_allowed=df_preprocess['creation_date'].max(),
-                    initial_visible_month=date(2021, 9, 14),
-                    date=date(2021, 9, 14)
-                ),
-                dcc.DatePickerSingle(
-                    id='my-date-picker-end',
-                    min_date_allowed=df_preprocess['creation_date'].min(),
-                    max_date_allowed=df_preprocess['creation_date'].max(),
-                    initial_visible_month=df_preprocess['creation_date'].max(),
-                    date=df_preprocess['creation_date'].max(),
-                ),
-            ])
-        ])
-        ], width=12),
+            html.H4("SELECT RANGE DATES:"),
+            dcc.DatePickerSingle(
+                id='my-date-picker-start',
+                min_date_allowed=df_preprocess['creation_date'].min(),
+                max_date_allowed=df_preprocess['creation_date'].max(),
+                initial_visible_month=date(2021, 9, 14),
+                date=date(2021, 9, 14)
+            ),
+            dcc.DatePickerSingle(
+                id='my-date-picker-end',
+                min_date_allowed=df_preprocess['creation_date'].min(),
+                max_date_allowed=df_preprocess['creation_date'].max(),
+                initial_visible_month=df_preprocess['creation_date'].max(),
+                date=df_preprocess['creation_date'].max(),
+            ),
+        ]),
     ]),
 
     dbc.Row(
@@ -91,14 +89,23 @@ layout = dbc.Container([
     ),
 # SECTION: Visitors Interactions, Incidents, Emergencies
     dbc.Row([
-        dbc.Row(children=[html.H2('Analysis of "Building Rapport" situations')]),
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H5("Building Rapport mapped by Interaction, Incident & Streetscape")
+                ])
+            ]), 
+            html.Br(),
+        ], width={'size': 12})
+    ]),
         dbc.Col([
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
+                        dbc.CardHeader(html.H5("Count of Building Rapport situations")),                    
                         dbc.CardBody([
-                            html.H5("Count of 'Building_Rapport' situations"),
-                            html.Div(id="building-rapport-count", children="", className='card-big-text')
+                            html.H3(id="building-rapport-count", children="", style={'fontWeight':'bold','textAlign':'center'})
                         ])
                     ])
                 ], width=4),
@@ -108,14 +115,14 @@ layout = dbc.Container([
                 dbc.Col([
                     dbc.Card([
                         dbc.CardBody([
-                            html.H5("Notes"),
-                            html.H5(id='br-concluding-remarks', children="'Building Rapport' situations",
+                            html.H5("Notes:"),
+                            html.H5(id='br-concluding-remarks', children="Building rapport is the process of connecting, a harmonious understanding with others within our community.",
                                     style={'fontWeight':'bold'})
                         ])
                     ])
                 ], width=12)
             ], className="mb-3")
-        ], width=4),
+        ], width=12),
 
         dbc.Col([
             dbc.Row([
@@ -128,21 +135,11 @@ layout = dbc.Container([
                     ])
                 ], width=12),
             ])
-        ], width=8)
+        ], width=12)
     ],className="mt-3", justify='center'),
 
     dbc.Row(
     dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
-    ),
-
-# SECTION: Link to main Page
-    dbc.Row(
-        dbc.Col(
-            dcc.Link('Go to main page', href='/')
-        )
-    ),
-    dbc.Row(
-        dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
     ),
 
 ])

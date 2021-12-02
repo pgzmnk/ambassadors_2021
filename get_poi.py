@@ -9,6 +9,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from shapely.geometry import shape
 import pandas as pd
+from pandas import Series
 import geopandas as gpd
 
 

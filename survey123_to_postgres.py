@@ -25,7 +25,7 @@ def create_survey123_dataframe():
     """
     # Credentials
     gis = GIS("https://12csi.maps.arcgis.com/", USER_NAME, PASSWORD)
-    print(f"Connected to {gis.properties.portalHostname} as {gis.users.me.username}")
+ #   print(f"Connected to {gis.properties.portalHostname} as {gis.users.me.username}")
 
     # Get the report
     sm = SurveyManager(gis)
@@ -34,7 +34,7 @@ def create_survey123_dataframe():
     # Download the report data as CSV
     arr1 = os.listdir(OUTPUT_DIR)
     report.download(export_format='csv', save_folder=OUTPUT_DIR)
-    print("Downloaded report.")
+  #  print("Downloaded report.")
 
     # Select newly added `.zip`
     arr2 = os.listdir(OUTPUT_DIR)
@@ -58,8 +58,8 @@ def load_to_postgres(df, table_name='survey_raw'):
     # Write dataframe to db with table name `surver_raw_table_name` (OVERWRITES)
     df.to_sql(table_name, engine, if_exists='replace')
 
-    print(df.head())
-    print('Succesfully wrote to DB.')
+  #  print(df.head())
+   # print('Succesfully wrote to DB.')
 
 
 if __name__=="__main__":

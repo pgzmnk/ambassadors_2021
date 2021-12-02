@@ -61,29 +61,36 @@ layout = dbc.Container([
             html.H1("Type of Event for Calgary Police Service Intervention", style={'textAlign':'center'})
         ])
     ]),
+
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H2("Engagement Provided")
+                ])
+            ]), 
+            html.Br(),
+        ], width={'size': 12})
+    ]),    
     
     dbc.Row([
         dbc.Col([
-        dbc.Card([
-            dbc.CardBody([
-                html.H4("Select range dates:"),
-                dcc.DatePickerSingle(
-                    id='my-date-picker-start',
-                    min_date_allowed=df_preprocess['creation_date'].min(),
-                    max_date_allowed=df_preprocess['creation_date'].max(),
-                    initial_visible_month=date(2021, 9, 14),
-                    date=date(2021, 9, 14)
-                ),
-                dcc.DatePickerSingle(
-                    id='my-date-picker-end',
-                    min_date_allowed=df_preprocess['creation_date'].min(),
-                    max_date_allowed=df_preprocess['creation_date'].max(),
-                    initial_visible_month=df_preprocess['creation_date'].max(),
-                    date=df_preprocess['creation_date'].max(),
-                ),
-            ])
-        ])
-        ], width=12),
+            html.H4("SELECT RANGE DATES:"),
+            dcc.DatePickerSingle(
+                id='my-date-picker-start',
+                min_date_allowed=df_preprocess['creation_date'].min(),
+                max_date_allowed=df_preprocess['creation_date'].max(),
+                initial_visible_month=date(2021, 9, 14),
+                date=date(2021, 9, 14)
+            ),
+            dcc.DatePickerSingle(
+                id='my-date-picker-end',
+                min_date_allowed=df_preprocess['creation_date'].min(),
+                max_date_allowed=df_preprocess['creation_date'].max(),
+                initial_visible_month=df_preprocess['creation_date'].max(),
+                date=df_preprocess['creation_date'].max(),
+            ),
+        ]),
     ]),
 
     dbc.Row(
@@ -91,34 +98,34 @@ layout = dbc.Container([
     ),
 # SECTION: Analysis of CPS situations
     dbc.Row([
-        dbc.Row(children=[html.H3('Analysis of CPS situations')]),
+    
         dbc.Col([
             dbc.Row([
                 dbc.Col([
                     dbc.Card([
+                        dbc.CardHeader(html.H5("Interactions")),
                         dbc.CardBody([
-                            html.H5("Interactions"),
                             html.H2(id="cps-interactions", children="", style={'fontWeight':'bold', 'textAlign':'center'})
                         ])
                     ])
-                ], width=4),
+                ], width={'size': 4}),
                 dbc.Col([
                     dbc.Card([
+                        dbc.CardHeader(html.H5("Incidents")),
                         dbc.CardBody([
-                            html.H5("Incidents"),
                             html.H2(id="cps-incidents", children="", style={'fontWeight':'bold','textAlign':'center'})
                         ])
                     ])
-                ], width=4),
+                ], width={'size': 4}),
 
                 dbc.Col([
                     dbc.Card([
+                        dbc.CardHeader(html.H5("Emergencies")),
                         dbc.CardBody([
-                            html.H5("Emergencies"),
                             html.H2(id="cps-emergencies", children="", style={'fontWeight':'bold', 'textAlign':'center'})
                         ])
                     ])
-                ], width=4),
+                ], width={'size': 4}),
             ], className="mb-3"),
 
             dbc.Row([
@@ -131,8 +138,8 @@ layout = dbc.Container([
                     ])
                 ], width=12)
             ], className="mb-3")
-        ], width=4),
-
+        ], width=12),
+        html.Br(),
         dbc.Col([
             dbc.Row([
                 dbc.Col([
@@ -145,19 +152,9 @@ layout = dbc.Container([
                     ])
                 ], width=12),
             ])
-        ], width=8)
+        ], width=12)
     ],className="mt-3", justify='center'),
 
-    dbc.Row(
-    dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
-    ),
-
-# SECTION: Link to main Page
-    dbc.Row(
-        dbc.Col(
-            dcc.Link('Go to main page', href='/')
-        )
-    ),
     dbc.Row(
         dbc.Col(html.Hr(style={'border': "3px solid gray"}),width=12)
     ),

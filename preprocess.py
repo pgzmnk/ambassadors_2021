@@ -116,11 +116,11 @@ def preprocess_and_load_survey_df():
     df_all["engage_request"] = df_all["engage_request"].str.replace(
         'other', 'no_data', regex=False)
 
-    # combine channeling with other_medical_health_concerns column
-    df_all['channeling'] = df_all.channelling.str.cat(
+    # combine channelling with other_channelling column
+    df_all['channelling'] = df_all.channelling.str.cat(
         df_all.other_channelling, sep=",")
     df_all = df_all.drop(columns=['other_channelling'])
-    df_all["channeling"] = df_all["channeling"].str.replace(
+    df_all["channelling"] = df_all["channelling"].str.replace(
         'other', 'no_data', regex=False)
 
     # combine referrals with other_referrals column
@@ -140,11 +140,17 @@ def preprocess_and_load_survey_df():
         'other', 'no_data', regex=False)
 
     points = get_poi.get_events_geoenriched()
+    points = points.drop(['index'], axis=1)
+    #print(points.dtypes)
     coord = get_poi.get_places_geoenriched()
+    coord = coord.drop(['index'], axis=1)
+    #print(coord.dtypes)
 
     # spatial join checking our x and y to see if inside the polygon co-ordinates
-    points_within = gpd.sjoin(points, coord.head(10), op='within')
+    points_within = gpd.sjoin(points, coord.head(10))
+    #points_within = gpd.sjoin(points, coord.head(10), op='within')
     points_within = points_within.rename(columns={'ObjectID': 'object_id'})
+    #print(points_within.dtypes)
 
     # joining both dataframes based on object_id
     df_all = pd.merge(
@@ -215,7 +221,7 @@ def input_data():
         {'label':'Event Type', 'value': "event_type"},
         {'label':'Person Involved', 'value': "person_involved"},
         {'label':'What Situation', 'value': "what_situation"},
-        {'label':'Medical Health Concens', 'value': "medical_health_concerns"},
+        {'label':'Medical Health Concerns', 'value': "medical_health_concerns"},
         {'label':'Problematic Social Behavior', 'value': "problematic_social_behavior"},
         {'label':'Streetscape', 'value': "streetscape_public_realm"},
         {'label':'Engagement Request', 'value': "engage_request"},
