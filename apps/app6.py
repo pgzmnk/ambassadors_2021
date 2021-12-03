@@ -58,20 +58,11 @@ category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[
 layout = dbc.Container([
     dbc.Row([
         dbc.Col([
-            html.H1("Type of Event for Calgary Police Service Intervention", style={'textAlign':'center'})
+            html.H1("Type of Event for Calgary Police Service Intervention", style={'textAlign':'left'})
         ])
     ]),
 
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H2("Engagement Provided")
-                ])
-            ]), 
-            html.Br(),
-        ], width={'size': 12})
-    ]),    
+ 
     
     dbc.Row([
         dbc.Col([

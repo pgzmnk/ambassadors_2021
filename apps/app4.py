@@ -55,15 +55,10 @@ input_data = preprocess.input_data()
 category_dict = {v_criteria: list(set(create_visual_1(df_preprocess,v_criteria)[v_criteria])) for v_criteria in target_columns}
 
 layout = dbc.Container([
-     dbc.Row([
+    dbc.Row([
         dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H2("Engagement Provided")
-                ])
-            ]), 
-            html.Br(),
-        ], width={'size': 12})
+            html.H1("Type of Engagement provided by East Calgary Ambassadors", style={'textAlign':'left'})
+        ])
     ]),
 
     dbc.Row([
