@@ -10,16 +10,25 @@ from sqlalchemy import create_engine
 # Load environment variables
 load_dotenv()
 
+# SQLAlchemy creates an engine that connects Pandas with a Postgres database
+# Documentation: https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html
+# Establish connection to Postgres db
+engine = create_engine(os.getenv('POSTGRES_CONNECTION', None))
+
+
+def write_pandas_to_db(df, table_name, engine=engine, if_exists='replace'):
+    # Write DataFrame to db as `table_name` table.
+    df.to_sql(table_name, engine, if_exists=if_exists)
+    
+    
+def read_table_to_pandas(table_name, engine=engine):
+    # Read SQL table with pandas.
+    df_all = pd.read_sql(f"SELECT * FROM {table_name}", engine)
+
 
 def preprocess_and_load_survey_df():
     """Extract and preprocess survey data
     """
-
-    # SQLAlchemy creates an engine that connects Pandas with a Postgres database
-    # Documentation: https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html
-
-    # Establish connection to Postgres db
-    engine = create_engine(os.getenv('POSTGRES_CONNECTION', None))
 
     # Read SQL table with pandas
     df_all = pd.read_sql("SELECT * FROM survey_raw", engine)
@@ -209,6 +218,12 @@ def preprocess_and_load_survey_df():
 
 
     return df_all
+
+
+
+
+
+
 def target_columns():
     target_columns = ['event_type', 'person_involved',
        'what_situation', 'medical_health_concerns', 'problematic_social_behavior',
@@ -238,6 +253,7 @@ def input_data():
 
 if __name__ == '__main__':
     df = preprocess_and_load_survey_df()
+    write_pandas_to_db(df, 'preprocess')
 #    print(df)
 
 
