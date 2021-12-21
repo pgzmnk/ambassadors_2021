@@ -23,7 +23,7 @@ def write_pandas_to_db(df, table_name, engine=engine, if_exists='replace'):
     
 def read_table_to_pandas(table_name, engine=engine):
     # Read SQL table with pandas.
-    df_all = pd.read_sql(f"SELECT * FROM {table_name}", engine)
+    return pd.read_sql(f"SELECT * FROM {table_name}", engine)
 
 
 def preprocess_and_load_survey_df():
