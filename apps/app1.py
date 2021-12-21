@@ -21,7 +21,8 @@ from app import app
 #app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])
 #This the website where the theme is picked https://bootswatch.com/flatly/
 
-df_preprocess = preprocess.preprocess_and_load_survey_df()
+# df_preprocess = preprocess.preprocess_and_load_survey_df()
+df_preprocess = preprocess.read_table_to_pandas('preprocess')
 df_preprocess['count_events']=1
 df_preprocess['creation_date'] = pd.to_datetime(df_preprocess['creation_date'])
 
